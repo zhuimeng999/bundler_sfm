@@ -415,7 +415,9 @@ double BundlerApp::RunSFM_Ceres(int num_pts, int num_cameras,
 
         options.num_threads = omp_get_max_threads();
 
+#if CERES_VERSION_MAJOR < 2
         options.num_linear_solver_threads = omp_get_max_threads();
+#endif  // CERES_VERSION_MAJOR
 
         ceres::Solver::Summary summary;
         ceres::Solve(options, &problem, &summary);
