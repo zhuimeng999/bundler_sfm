@@ -36,3 +36,8 @@ list_keys.txt
 list_tmp.txt
 options.txt
 sift.txt
+
+# clion ide configuration
+compile_commands.json
+.idea
+
