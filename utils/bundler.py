@@ -347,12 +347,12 @@ def extract_focal_length(images=[], scale=1.0, verbose=False):
     If no focal length is extracted for an image, the second pair is None.
     """
     if len(images) == 0:
-        if verbose: print "[- Creating list of images -]"
+        if verbose: print("[- Creating list of images -]")
         images = get_images()
 
     ret = {}
     for image in images:
-        if verbose: print "[Extracting EXIF tags from image {0}]".format(image)
+        if verbose: print("[Extracting EXIF tags from image {0}]".format(image))
 
         tags = {}
         with open(image, 'rb') as fp:
@@ -380,32 +380,32 @@ def extract_focal_length(images=[], scale=1.0, verbose=False):
         # Extract CCD Width (Prefer Lookup Table)
         ccd_width = 1.0
         make_model = tags.get('Make', '') + ' ' + tags.get('Model', '')
-        if CCD_WIDTHS.has_key(make_model.strip()):
+        if make_model.strip() in CCD_WIDTHS:
             ccd_width = CCD_WIDTHS[make_model.strip()]
         else:
             fplaneN, fplaneD = tags.get('FocalPlaneXResolution', (0, 1))
             if fplaneN != 0:
                 ccd_width = 25.4*float(img_width)*float(fplaneD)/float(fplaneN)
-                if verbose: print "  [Using CCD width from EXIF tags]"
+                if verbose: print("  [Using CCD width from EXIF tags]")
             else:
                 ccd_width = 0
 
         if verbose:
-            print "  [EXIF focal length = {0}mm]".format(focal_length)
-            print "  [EXIF CCD width = {0}mm]".format(ccd_width)
-            print "  [EXIF resolution = {0} x {1}]".format(
-                img_width, img_height)
+            print("  [EXIF focal length = {0}mm]".format(focal_length))
+            print("  [EXIF CCD width = {0}mm]".format(ccd_width))
+            print("  [EXIF resolution = {0} x {1}]".format(
+                img_width, img_height))
             if ccd_width == 0:
-                print "  [No CCD width available for camera {0}]".format(
-                    make_model)
+                print("  [No CCD width available for camera {0}]".format(
+                    make_model))
 
         if (img_width==0 or img_height==0 or focalN==0 or ccd_width==0):
-            if verbose: print "  [Could not determine pixel focal length]"
+            if verbose: print("  [Could not determine pixel focal length]")
             continue
 
         # Compute Focal Length in Pixels
         ret[image] = img_width * (focal_length / ccd_width) * scale
-        if verbose: print "  [Focal length (pixels) = {0}]".format(ret[image])
+        if verbose: print("  [Focal length (pixels) = {0}]".format(ret[image]))
 
     return ret
 
@@ -489,14 +489,14 @@ def match_images(key_files, matches_file, verbose=False):
             BIN_MATCHKEYS = os.path.join(BIN_PATH, "KeyMatchFull")
 
     keys_file = ""
-    with tempfile.NamedTemporaryFile(delete=False) as fp:
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as fp:
         for key in key_files:
             fp.write(key + '\n')
         keys_file = fp.name
 
     # Add lib folder to LD_LIBRARY_PATH
     env = dict(os.environ)
-    if env.has_key('LD_LIBRARY_PATH'):
+    if 'LD_LIBRARY_PATH' in env:
         env['LD_LIBRARY_PATH'] = env['LD_LIBRARY_PATH'] + ':' + LIB_PATH
     else:
         env['LD_LIBRARY_PATH'] = LIB_PATH
@@ -545,11 +545,11 @@ def bundler(image_list=None, options_file=None, shell=False, *args, **kwargs):
 
     str_args = [a for a in args if type(a) == str]
     for k,v in kwargs.items():
-        if not kwargs_dict.has_key(k): continue
+        if k not in kwargs_dict: continue
         str_args.extend(kwargs_dict[k](k,v))
 
     if len(str_args) != 0 and options_file is not None:
-        with open(options_file, 'wb') as fp:
+        with open(options_file, 'w') as fp:
             for o in str_args:
                 if o.startswith('--'): fp.write('\n')
                 else: fp.write(' ')
@@ -557,7 +557,7 @@ def bundler(image_list=None, options_file=None, shell=False, *args, **kwargs):
 
     image_list_file = ""
     if type(image_list) == dict:
-        with tempfile.NamedTemporaryFile(delete=False) as fp:
+        with tempfile.NamedTemporaryFile(delete=False, mode='w') as fp:
             for image,value in image_list.items():
                 if value == None: fp.write(image + '\n')
                 else: fp.write(' '.join([image, '0', str(value), '\n']))
@@ -569,7 +569,7 @@ def bundler(image_list=None, options_file=None, shell=False, *args, **kwargs):
 
     # Add lib folder to LD_LIBRARY_PATH
     env = dict(os.environ)
-    if env.has_key('LD_LIBRARY_PATH'):
+    if 'LD_LIBRARY_PATH' in env:
         env['LD_LIBRARY_PATH'] = env['LD_LIBRARY_PATH'] + ':' + LIB_PATH
     else:
         env['LD_LIBRARY_PATH'] = LIB_PATH
@@ -592,25 +592,25 @@ def run_bundler(images=[], verbose=False, parallel=True):
     """Prepare images and run bundler with default options."""
     # Create list of images
     if len(images) == 0:
-        if verbose: print "[- Creating list of images -]"
+        if verbose: print("[- Creating list of images -]")
         images = get_images()
 
     # Extract focal length
     if type(images) == list:
-        if verbose: print "[- Extracting EXIF tags from images -]"
+        if verbose: print("[- Extracting EXIF tags from images -]")
         images = extract_focal_length(images, verbose=verbose)
 
     # Extract SIFT features from images
-    if verbose: print "[- Extracting keypoints -]"
+    if verbose: print("[- Extracting keypoints -]")
     key_files = sift_images(images, parallel=parallel, verbose=verbose)
 
     # Match images
-    if verbose: print "[- Matching keypoints (this can take a while) -]"
+    if verbose: print("[- Matching keypoints (this can take a while) -]")
     matches_file = "matches.init.txt"
     match_images(key_files, matches_file, verbose=verbose)
 
     # Run Bundler
-    if verbose: print "[- Running Bundler -]"
+    if verbose: print("[- Running Bundler -]")
     bundler(image_list=images,
             options_file="options.txt",
             verbose=verbose,
@@ -625,7 +625,7 @@ def run_bundler(images=[], verbose=False, parallel=True):
             estimate_distortion=True,
             run_bundle=True)
 
-    if verbose: print "[- Done -]"
+    if verbose: print("[- Done -]")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=DESCRIPTION)
