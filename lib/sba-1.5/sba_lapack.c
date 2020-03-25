@@ -1052,18 +1052,17 @@ double *a;
  */
 int sba_symat_invert_BK(double *A, int m)
 {
-static double *buf=NULL;
-static int buf_sz=0, nb=0;
+static int nb=0;
 
 int a_sz, ipiv_sz, work_sz, tot_sz;
 register int i, j;
-int info, *ipiv;
-double *a, *work;
+int info;
    
   if(A==NULL){
-    if(buf) free(buf);
-    buf=NULL;
-    buf_sz=0;
+      //TODO: no need to free memory
+//    if(buf) free(buf);
+//    buf=NULL;
+//    buf_sz=0;
 
     return 1;
   }
@@ -1086,20 +1085,10 @@ double *a, *work;
   work_sz=(work_sz>=m)? work_sz : m; /* ensure that work is at least m elements long, as required by dsytri */
   tot_sz=ipiv_sz*sizeof(int) + (a_sz + work_sz)*sizeof(double);
 
-  if(tot_sz>buf_sz){ /* insufficient memory, allocate a "big" memory chunk at once */
-    if(buf) free(buf); /* free previously allocated memory */
 
-    buf_sz=tot_sz;
-    buf=(double *)malloc(buf_sz);
-    if(!buf){
-      fprintf(stderr, "memory allocation in sba_symat_invert_BK() failed!\n");
-      exit(1);
-    }
-  }
-
-  ipiv=(int *)buf;
-  a=(double *)(ipiv + ipiv_sz);
-  work=a+a_sz;
+  int ipiv[ipiv_sz];
+    double a[a_sz];
+    double work[work_sz];
 
   /* store A into a; A is assumed symmetric, hence no transposition is needed */
   for(i=0, j=a_sz; i<j; ++i)
