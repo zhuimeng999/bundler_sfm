@@ -5,7 +5,7 @@ USE_CERES=true
 CC=gcc
 CXX=g++
 OPTFLAGS=-O3 -Wall -Wno-unused-result
-# OPTFLAGS=-g2
+OPTFLAGS=-g2
 OTHERFLAGS=-std=gnu++0x
 
 OS=$(shell uname -o)
